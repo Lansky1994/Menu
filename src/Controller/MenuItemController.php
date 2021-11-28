@@ -2,9 +2,14 @@
 
 namespace App\Controller;
 
-use App\Repository\MenuItemRepository;
+use App\Model\GetMenuItem;
+use App\Model\AddMenuItem;
+
+use App\Model\UpdateMenuItem;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -12,81 +17,47 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class MenuItemController extends AbstractController
 {
-    private $menuItemRepository;
 
-    public function __construct(MenuItemRepository $menuItemRepository)
+    /**
+     * @Route ("/guest/{id}", name="menu_guest", methods={"GET"})
+     */
+    public function GetMenuRole($id, GetMenuItem $getMenuItem): JsonResponse
     {
-        $this->menuItemRepository = $menuItemRepository;
+        $menuRole = $getMenuItem->getMenuRole($id);
+
+        return new JsonResponse($menuRole);
+    }
+
+
+    /**
+     * @param Request $request
+     * @param AddMenuItem $menuItem
+     * @return JsonResponse
+     * @Route("", name="add_menu_item", methods={"POST"})
+     */
+    public function addMenuItem(Request $request,AddMenuItem $menuItem): JsonResponse
+    {
+        $data = $menuItem->beforeDecorator(json_decode($request->getContent(), true));
+        $validate = $menuItem->validate($data);
+
+        $response = $menuItem->saveMenuItem($data);
+        return new JsonResponse($validate ? $response : null,
+            $validate ? Response::HTTP_OK : Response::HTTP_BAD_REQUEST);
     }
 
     /**
-     * @Route ("/guest", name="menu_guest", methods={"GET"})
+     * @param $id
+     * @return JsonResponse
+     * @Route ("/{id}", name="update_menu_item", methods={"PUT"})
      */
-    public function GetGuestMenu(): JsonResponse
+    public function updateMenu(int $id, UpdateMenuItem $updateMenuItem, Request $request): JsonResponse
     {
+        $data = $updateMenuItem->beforeDecorator(json_decode($request->getContent(), true));
+        $validate = $updateMenuItem->validate($data);
 
-        $menuItems = $this->menuItemRepository->findAllCoursByProject();
+        $response = $updateMenuItem->updateItem($id, $data);
 
-        $resp = [];
-
-        // Ищем меню айтем у которого есть родитель
-        foreach ($menuItems as $menuItem){
-            if ($menuItem->getParent() != null)
-            {
-                $isSet = false;
-                $sub = [
-                    "id" => $menuItem->getId(),
-                    "title" => $menuItem->getTitle(),
-                    "alias" => $menuItem->getAlias(),
-                ];
-
-                // Нет ли у нас поля в таблице меню проверяем
-                foreach ($resp as $index => $value) {
-//                    echo "<pre>";
-//                    print_r($value);
-//                    echo "</pre>";
-                    if ($value["id"] == $menuItem->getParent()->getId())
-                    {
-                        $isSet = true;
-                        $resp[$index]["children"][] = $sub;
-                    }
-                }
-
-                //Создаем родителя
-                if (!$isSet)
-                {
-                    $resp[] = [
-                        "id" => $menuItem->getParent()->getId(),
-                        "title" => $menuItem->getParent()->getTitle(),
-                        "alias" => $menuItem->getParent()->getAlias(),
-                        "children" => [$sub]
-                    ];
-                }
-            }
-        }
-
-        //Смотрим подпункты у которых нет меню айди -> родителя
-        foreach ($menuItems as $menuItem) {
-
-            if ($menuItem->getParent() == null)
-            {
-                //Засовываем под меню в под меню
-                foreach ($resp as $key=>$value) {
-                    foreach ($value["children"] as $j=>$c) {
-                        if ($c["id"] == $menuItem->getMenuItem()->getId()) {
-                            $sub = [
-                                "id" => $menuItem->getId(),
-                                "title" => $menuItem->getTitle(),
-                                "alias" => $menuItem->getAlias(),
-                            ];
-
-                            $resp[$key]["children"][$j]["children"][]=$sub;
-                        }
-
-                    }
-                }
-            }
-        }
-        return new JsonResponse($resp);
+        return new JsonResponse($validate ? $response : null,
+        $validate ? Response::HTTP_OK : Response::HTTP_BAD_REQUEST);
     }
 }

@@ -55,12 +55,12 @@ where role.ROLE_NAME = "GUEST";', $rsm);
     }
 
 
-    public function findAllCoursByProject()
+    public function findAllCoursByProject($id)
     {
         return $this->createQueryBuilder('m')
             ->join('m.idRole', 'r')
             ->where('r = :project')
-            ->setParameter('project', 3)
+            ->setParameter('project', $id)
             ->getQuery()
             ->getResult()
             ;
