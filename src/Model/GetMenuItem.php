@@ -14,6 +14,21 @@ class GetMenuItem
         $this->menuItemRepository = $menuItemRepository;
     }
 
+    //мы передаем меню айди и в цикле по всем мню айди ищем те которые свзаны по первому (которое мы передали) меню айди
+    public function getChildren($id, $menuItems) {
+        $childrens = [];
+        foreach ($menuItems as $mi) {
+            if ($mi->getMenuItem() !== null && $mi->getMenuItem()->GetId() == $id) {
+            $childrens[] = [
+                'id' => $mi->getId(),
+                'title' => $mi->getTitle(),
+                'children' => $this->getChildren($mi->getID(), $menuItems)
+            ];
+            }
+        }
+        return $childrens;
+    }
+
     public function getMenuRole($id)
     {
         $menuItems = $this->menuItemRepository->findAllCoursByProject($id);
@@ -22,20 +37,18 @@ class GetMenuItem
 
         // Ищем меню айтем у которого есть родитель
         foreach ($menuItems as $menuItem){
-            if ($menuItem->getParent() != null)
+            if ($menuItem->getMenuItem() == null)
             {
                 $isSet = false;
                 $sub = [
                     "id" => $menuItem->getId(),
                     "title" => $menuItem->getTitle(),
                     "alias" => $menuItem->getAlias(),
+                    'children' => $this->getChildren($menuItem->getId(), $menuItems)
                 ];
 
                 // Нет ли у нас поля в таблице меню проверяем
                 foreach ($resp as $index => $value) {
-//                    echo "<pre>";
-//                    print_r($value);
-//                    echo "</pre>";
                     if ($value["id"] == $menuItem->getParent()->getId())
                     {
                         $isSet = true;
@@ -56,28 +69,27 @@ class GetMenuItem
             }
         }
 
-        //Смотрим подпункты у которых нет меню айди -> родителя
-        foreach ($menuItems as $menuItem) {
-
-            if ($menuItem->getParent() == null)
-            {
-                //Засовываем под меню в под меню
-                foreach ($resp as $key=>$value) {
-                    foreach ($value["children"] as $j=>$c) {
-                        if ($c["id"] == $menuItem->getMenuItem()->getId()) {
-                            $sub = [
-                                "id" => $menuItem->getId(),
-                                "title" => $menuItem->getTitle(),
-                                "alias" => $menuItem->getAlias(),
-                            ];
-
-                            $resp[$key]["children"][$j]["children"][]=$sub;
-                        }
-
-                    }
-                }
-            }
-        }
+//        //Смотрим подпункты у которых нет меню айди -> родителя
+//        foreach ($menuItems as $menuItem) {
+//
+//            if ($menuItem->getParent() == null)
+//            {
+//                //Засовываем под меню в под меню
+//                foreach ($resp as $key=>$value) {
+//                    foreach ($value["children"] as $j=>$c) {
+//                        if ($c["id"] == $menuItem->getMenuItem()->getId()) {
+//                            $sub = [
+//                                "id" => $menuItem->getId(),
+//                                "title" => $menuItem->getTitle(),
+//                                "alias" => $menuItem->getAlias(),
+//                            ];
+//
+//                            $resp[$key]["children"][$j]["children"][]=$sub;
+//                        }
+//                    }
+//                }
+//            }
+//        }
         return $resp;
     }
 
