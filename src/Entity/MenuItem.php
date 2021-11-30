@@ -2,15 +2,13 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * MenuItem
  *
  * @ORM\Table(name="menu_item", indexes={@ORM\Index(name="fk_menu_item_id_idx", columns={"MENU_ITEM"}), @ORM\Index(name="fk_parent_id_idx", columns={"PARENT_ID"})})
- * @ORM\Entity(repositoryClass="App\Repository\MenuItemRepository")
+ * @ORM\Entity
  */
 class MenuItem
 {
@@ -80,16 +78,6 @@ class MenuItem
     private $changedDate;
 
     /**
-     * @var \Menu
-     *
-     * @ORM\ManyToOne(targetEntity="Menu")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="PARENT_ID", referencedColumnName="ID")
-     * })
-     */
-    private $parent;
-
-    /**
      * @var \MenuItem
      *
      * @ORM\ManyToOne(targetEntity="MenuItem")
@@ -100,27 +88,14 @@ class MenuItem
     private $menuItem;
 
     /**
-     * @var \Doctrine\Common\Collections\Collection
+     * @var \Menu
      *
-     * @ORM\ManyToMany(targetEntity="Role", inversedBy="idMenuItem")
-     * @ORM\JoinTable(name="menu_item_role",
-     *   joinColumns={
-     *     @ORM\JoinColumn(name="ID_MENU_ITEM", referencedColumnName="ID")
-     *   },
-     *   inverseJoinColumns={
-     *     @ORM\JoinColumn(name="ID_ROLE", referencedColumnName="ID")
-     *   }
-     * )
+     * @ORM\ManyToOne(targetEntity="Menu")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="PARENT_ID", referencedColumnName="ID")
+     * })
      */
-    private $idRole;
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->idRole = new \Doctrine\Common\Collections\ArrayCollection();
-    }
+    private $parent;
 
     public function getId(): ?int
     {
@@ -223,18 +198,6 @@ class MenuItem
         return $this;
     }
 
-    public function getParent(): ?Menu
-    {
-        return $this->parent;
-    }
-
-    public function setParent(?Menu $parent): self
-    {
-        $this->parent = $parent;
-
-        return $this;
-    }
-
     public function getMenuItem(): ?self
     {
         return $this->menuItem;
@@ -247,28 +210,17 @@ class MenuItem
         return $this;
     }
 
-    /**
-     * @return Collection|Role[]
-     */
-    public function getIdRole(): Collection
+    public function getParent(): ?Menu
     {
-        return $this->idRole;
+        return $this->parent;
     }
 
-    public function addIdRole(Role $idRole): self
+    public function setParent(?Menu $parent): self
     {
-        if (!$this->idRole->contains($idRole)) {
-            $this->idRole[] = $idRole;
-        }
+        $this->parent = $parent;
 
         return $this;
     }
 
-    public function removeIdRole(Role $idRole): self
-    {
-        $this->idRole->removeElement($idRole);
-
-        return $this;
-    }
 
 }

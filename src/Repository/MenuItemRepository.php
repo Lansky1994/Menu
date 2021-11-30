@@ -40,31 +40,33 @@ where role.ROLE_NAME = "GUEST";', $rsm);
         return $users;
     }
 
-    public function findAllGreaterThanPrice()
+    public function findAllCoursByProject($id)
     {
         $entityManager = $this->getEntityManager();
 
         $query = $entityManager->createQuery(
             'SELECT m
-            FROM App\Entity\MenuItem m
-            JOIN m.idRole r
-            WHERE r.id = 3');
+            FROM App\Entity\MenuItem m      
+            JOIN App\Entity\MenuItemRole r WITH m.id = r.idMenuItem
+            JOIN App\Entity\Menu mm WITH mm.id = m.parent
+            WHERE r.idRole in (:roles)
+            AND mm.alias in (:workspace)')->setParameter('workspace', ["workspace", "garage"])->setParameter('roles', [1,3]);
 
         // returns an array of Product objects
         return $query->getResult();
     }
 
-
-    public function findAllCoursByProject($id)
-    {
-        return $this->createQueryBuilder('m')
-            ->join('m.idRole', 'r')
-            ->where('r = :project')
-            ->setParameter('project', $id)
-            ->getQuery()
-            ->getResult()
-            ;
-    }
+//
+//    public function findAllCoursByProject($id)
+//    {
+//        return $this->createQueryBuilder('m')
+//            ->join('m.idRole', 'r')
+//            ->where('r = :project')
+//            ->setParameter('project', $id)
+//            ->getQuery()
+//            ->getResult()
+//            ;
+//    }
     // /**
     //  * @return MenuItem[] Returns an array of MenuItem objects
     //  */

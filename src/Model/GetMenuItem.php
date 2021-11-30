@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\Interfaces\MenuRoleInterfaces;
 use App\Repository\MenuItemRepository;
 
 
@@ -19,11 +20,20 @@ class GetMenuItem
         $childrens = [];
         foreach ($menuItems as $mi) {
             if ($mi->getMenuItem() !== null && $mi->getMenuItem()->GetId() == $id) {
-            $childrens[] = [
+             $newClidren = [
                 'id' => $mi->getId(),
                 'title' => $mi->getTitle(),
-                'children' => $this->getChildren($mi->getID(), $menuItems)
+
             ];
+
+                $child = $this->getChildren($mi->getID(), $menuItems);
+
+                if (count($child)) {
+                    $newClidren['children'] = $child;
+                }
+
+
+                $childrens[] = $newClidren;
             }
         }
         return $childrens;
@@ -44,8 +54,13 @@ class GetMenuItem
                     "id" => $menuItem->getId(),
                     "title" => $menuItem->getTitle(),
                     "alias" => $menuItem->getAlias(),
-                    'children' => $this->getChildren($menuItem->getId(), $menuItems)
+
                 ];
+                $childrens = $this->getChildren($menuItem->getId(), $menuItems);
+
+                if (count($childrens)) {
+                    $sub['children'] =  $childrens;
+                }
 
                 // Нет ли у нас поля в таблице меню проверяем
                 foreach ($resp as $index => $value) {

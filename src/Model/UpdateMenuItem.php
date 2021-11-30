@@ -56,7 +56,7 @@ class UpdateMenuItem
                 ])
             ]),
             'title' => new Assert\NotNull(),
-            'alias' => new Assert\NotNull(),
+            'alias' => new Assert\Url(),
             'icon' => new Assert\NotNull(),
             'roles' => new Assert\Required([
                 new Assert\Type('array'),

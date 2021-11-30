@@ -55,6 +55,8 @@ class MenuItemController extends AbstractController
         $data = $updateMenuItem->beforeDecorator(json_decode($request->getContent(), true));
         $validate = $updateMenuItem->validate($data);
 
+        dump($validate);die;
+
         $response = $updateMenuItem->updateItem($id, $data);
 
         return new JsonResponse($validate ? $response : null,
