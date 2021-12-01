@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Interfaces\MenuRoleInterfaces;
 use App\Model\GetMenuItem;
 use App\Model\AddMenuItem;
 
@@ -19,11 +20,11 @@ class MenuItemController extends AbstractController
 {
 
     /**
-     * @Route ("/guest/{id}", name="menu_guest", methods={"GET"})
+     * @Route ("/item/{alias}", name="menu_guest", methods={"GET"})
      */
-    public function GetMenuRole($id, GetMenuItem $getMenuItem): JsonResponse
+    public function GetMenuRole($alias, GetMenuItem $getMenuItem): JsonResponse
     {
-        $menuRole = $getMenuItem->getMenuRole($id);
+        $menuRole = $getMenuItem->getMenuRole($alias,MenuRoleInterfaces::MENU_ITEM_ROLE);
 
         return new JsonResponse($menuRole);
     }
@@ -55,7 +56,6 @@ class MenuItemController extends AbstractController
         $data = $updateMenuItem->beforeDecorator(json_decode($request->getContent(), true));
         $validate = $updateMenuItem->validate($data);
 
-        dump($validate);die;
 
         $response = $updateMenuItem->updateItem($id, $data);
 

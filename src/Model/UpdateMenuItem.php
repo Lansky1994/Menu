@@ -4,6 +4,7 @@ namespace App\Model;
 
 use App\Entity\Menu;
 use App\Entity\MenuItem;
+use App\Entity\MenuItemRole;
 use App\Entity\Role;
 use App\Repository\MenuItemRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -109,11 +110,9 @@ class UpdateMenuItem
                 if (is_null($roles)) {
                     throw new \Exception('Ошибка роли');
                 }
-                $roleId[] = $roles;
+                $roleId[] = $roles->getId();
             }
         }
-
-
 
         empty($data['parentId']) ? true : $idItem->setParent($parentId);
         empty($data['menuItem']) ? true : $idItem->setMenuItem($menuId);
@@ -121,18 +120,37 @@ class UpdateMenuItem
         empty($data['alias']) ? true : $idItem->setAlias($data['alias']);
         empty($data['icon']) ? true : $idItem->setIcon($data['icon']);
 
-        $ss = $idItem->getIdRole();
-        foreach ($ss as $s){
-            $idItem->removeIdRole($s);
-        }
-
-        if ($data['roles'] !== null){
-             foreach ($roleId as $role){
-                 $idItem->addIdRole($role);
-             }
-        }
+//        $ss = $idItem->getIdRole();
+//        foreach ($ss as $s){
+//            $idItem->removeIdRole($s);
+//        }
+//
+//        if ($data['roles'] !== null){
+//             foreach ($roleId as $role){
+//                 $idItem->addIdRole($role);
+//             }
+//        }
 
         $this->entityManager->flush();
+
+        $sss = $this->entityManager->getRepository(MenuItemRole::class)->findBy(['idMenuItem' => $id]);
+
+
+        if (!empty($sss))
+        foreach ($sss as $s){
+            $this->entityManager->remove($s);
+            $this->entityManager->flush();
+        }
+
+        if(!empty($roleId)){
+            foreach ($roleId as $role){
+                $newRole = new MenuItemRole();
+                $newRole->setIdMenuItem($idItem);
+                $newRole->setIdRole($role);
+                $this->entityManager->persist($newRole);
+                $this->entityManager->flush();
+            }
+        }
 
     }
 }

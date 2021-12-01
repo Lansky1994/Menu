@@ -40,7 +40,7 @@ where role.ROLE_NAME = "GUEST";', $rsm);
         return $users;
     }
 
-    public function findAllCoursByProject($id)
+    public function findAllCoursByProject($alias, $id)
     {
         $entityManager = $this->getEntityManager();
 
@@ -50,7 +50,8 @@ where role.ROLE_NAME = "GUEST";', $rsm);
             JOIN App\Entity\MenuItemRole r WITH m.id = r.idMenuItem
             JOIN App\Entity\Menu mm WITH mm.id = m.parent
             WHERE r.idRole in (:roles)
-            AND mm.alias in (:workspace)')->setParameter('workspace', ["workspace", "garage"])->setParameter('roles', [1,3]);
+            AND mm.alias = :workspace
+            AND mm.showMenu = true')->setParameter('workspace', $alias)->setParameter('roles', $id);
 
         // returns an array of Product objects
         return $query->getResult();

@@ -6,7 +6,7 @@ use App\Interfaces\MenuRoleInterfaces;
 use App\Repository\MenuItemRepository;
 
 
-class GetMenuItem
+class GetMenuItem implements MenuRoleInterfaces
 {
     private $menuItemRepository;
 
@@ -39,9 +39,9 @@ class GetMenuItem
         return $childrens;
     }
 
-    public function getMenuRole($id)
+    public function getMenuRole($alias, $id)
     {
-        $menuItems = $this->menuItemRepository->findAllCoursByProject($id);
+        $menuItems = $this->menuItemRepository->findAllCoursByProject($alias, $id);
 
         $resp = [];
 
@@ -82,6 +82,14 @@ class GetMenuItem
                     ];
                 }
             }
+        }
+        if (empty($resp)){
+            $resp[] = [
+                "id" => $menuItem->getParent()->getId(),
+                "title" => $menuItem->getParent()->getTitle(),
+                "alias" => $menuItem->getParent()->getAlias(),
+            ];
+            return $resp;
         }
 
 //        //Смотрим подпункты у которых нет меню айди -> родителя

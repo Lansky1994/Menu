@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * MenuItem
  *
  * @ORM\Table(name="menu_item", indexes={@ORM\Index(name="fk_menu_item_id_idx", columns={"MENU_ITEM"}), @ORM\Index(name="fk_parent_id_idx", columns={"PARENT_ID"})})
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\MenuItemRepository")
  */
 class MenuItem
 {
@@ -78,16 +78,6 @@ class MenuItem
     private $changedDate;
 
     /**
-     * @var \MenuItem
-     *
-     * @ORM\ManyToOne(targetEntity="MenuItem")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="MENU_ITEM", referencedColumnName="ID")
-     * })
-     */
-    private $menuItem;
-
-    /**
      * @var \Menu
      *
      * @ORM\ManyToOne(targetEntity="Menu")
@@ -96,6 +86,16 @@ class MenuItem
      * })
      */
     private $parent;
+
+    /**
+     * @var \MenuItem
+     *
+     * @ORM\ManyToOne(targetEntity="MenuItem")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="MENU_ITEM", referencedColumnName="ID")
+     * })
+     */
+    private $menuItem;
 
     public function getId(): ?int
     {
@@ -198,18 +198,6 @@ class MenuItem
         return $this;
     }
 
-    public function getMenuItem(): ?self
-    {
-        return $this->menuItem;
-    }
-
-    public function setMenuItem(?self $menuItem): self
-    {
-        $this->menuItem = $menuItem;
-
-        return $this;
-    }
-
     public function getParent(): ?Menu
     {
         return $this->parent;
@@ -218,6 +206,18 @@ class MenuItem
     public function setParent(?Menu $parent): self
     {
         $this->parent = $parent;
+
+        return $this;
+    }
+
+    public function getMenuItem(): ?self
+    {
+        return $this->menuItem;
+    }
+
+    public function setMenuItem(?self $menuItem): self
+    {
+        $this->menuItem = $menuItem;
 
         return $this;
     }

@@ -4,6 +4,7 @@ namespace App\Model;
 
 use App\Entity\Menu;
 use App\Entity\MenuItem;
+use App\Entity\MenuItemRole;
 use App\Entity\Role;
 use App\Repository\MenuItemRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -102,7 +103,7 @@ class AddMenuItem
                 if (is_null($roles)){
                     throw new \Exception('Ошибка роли');
                 }
-                $roleId[] = $roles;
+                $roleId[] = $roles->getId();
             }
         }
 
@@ -115,14 +116,26 @@ class AddMenuItem
             ->setTitle($data['title'])
             ->setAlias($data['alias'])
             ->setIcon($data['icon']);
-            if ($roleId !== null){
-                foreach ($roleId as $role){
-                    $newMenuItem->addIdRole($role);
-                }
-            }
+//            if ($roleId !== null){
+//                foreach ($roleId as $role){
+//                    $newMenuItem->addIdRole($role);
+//                }
+//            }
 
             $this->entityManager->persist($newMenuItem);
             $this->entityManager->flush();
+
+            if(!empty($roleId)){
+                foreach ($roleId as $role){
+                    $newRole = new MenuItemRole();
+                    $newRole->setIdMenuItem($newMenuItem);
+                    $newRole->setIdRole($role);
+                    $this->entityManager->persist($newRole);
+                    $this->entityManager->flush();
+                }
+            }
+
+
 
     }
 
